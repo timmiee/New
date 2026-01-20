@@ -1,274 +1,850 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Water Drop Survivor - Enhanced FX</title>
-  <style>
-    body {
-      margin: 0; padding: 0; overflow: hidden;
-      background-color: #FFF0F5;
-      font-family: 'M PLUS Rounded 1c', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      touch-action: none; user-select: none; -webkit-user-select: none;
-    }
-    #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-    #ui-layer {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between;
-    }
-    .hud-top { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-    .bar-container {
-      width: 200px; height: 20px; background: rgba(0, 0, 0, 0.2);
-      border-radius: 10px; border: 2px solid #fff; overflow: hidden; position: relative;
-    }
-    .bar-fill { height: 100%; width: 100%; transition: width 0.2s; }
-    #hp-bar .bar-fill { background: #FF69B4; width: 100%; }
-    #exp-bar .bar-fill { background: #4ECDC4; width: 0%; }
-    .stat-text {
-      color: #FF69B4; font-weight: bold; text-shadow: 1px 1px 0 #fff; font-size: 14px;
-    }
-    #joystick-zone {
-      position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-      width: 150px; height: 150px; pointer-events: auto;
-    }
-    #levelup-modal {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255, 240, 245, 0.9); display: none;
-      flex-direction: column; align-items: center; justify-content: center;
-      pointer-events: auto; z-index: 20;
-    }
-    .modal-content {
-      background: #fff; padding: 20px; border-radius: 20px; border: 4px solid #FF69B4;
-      width: 80%; max-width: 400px; text-align: center;
-    }
-    .upgrade-card {
-      background: #E6E6FA; margin: 10px 0; padding: 15px; border-radius: 15px;
-      border: 2px solid #9370DB; cursor: pointer;
-    }
-    .damage-number {
-      position: absolute; color: #fff; font-weight: bold; font-size: 20px;
-      pointer-events: none; text-shadow: 0 0 3px #FF0000;
-      animation: floatUp 1s forwards;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
-    }
-    .btn {
-      background: #FF69B4; color: white; border: none; padding: 15px 30px;
-      font-size: 20px; border-radius: 50px; margin-top: 20px; font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waterdrop Survivor - Dopamin Max</title>
+
+<style>
+html, body {
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  background:#050509;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+canvas { display:block; }
+
+/* HUD */
+#hud {
+  position:absolute;
+  top:10px;
+  left:10px;
+  color:#fff;
+  z-index:10;
+  font-size:14px;
+  text-shadow:0 0 6px rgba(0,0,0,0.8);
+}
+.hud-row {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:4px;
+}
+#expStar {
+  width:20px;
+  height:20px;
+  background:radial-gradient(circle at 30% 30%, #fff 0, #ffd94d 40%, #ff9f1c 70%, transparent 72%);
+  clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter:drop-shadow(0 0 6px #ffdd55);
+  transform-origin:center center;
+}
+
+/* Level up overlay */
+#levelUpOverlay {
+  position:absolute;
+  inset:0;
+  background:rgba(3,3,10,0.85);
+  backdrop-filter:blur(8px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:20;
+  color:#fff;
+}
+
+#levelUpTitle {
+  font-size:28px;
+  letter-spacing:2px;
+  margin-bottom:16px;
+  text-shadow:0 0 12px #00f0ff;
+}
+
+#levelUpCards {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.level-card {
+  width:140px;
+  padding:10px;
+  border-radius:12px;
+  background:linear-gradient(145deg, #141428, #1f1f3a);
+  box-shadow:0 0 12px rgba(0,0,0,0.8);
+  border:1px solid rgba(255,255,255,0.08);
+  cursor:pointer;
+  transform:scale(0.8);
+  opacity:0;
+  transition:transform 0.25s ease-out, opacity 0.25s ease-out, box-shadow 0.2s;
+}
+.level-card:hover {
+  box-shadow:0 0 16px rgba(0,255,200,0.7);
+  transform:scale(0.9) translateY(-4px);
+}
+.level-card-title {
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:4px;
+}
+.level-card-desc {
+  font-size:11px;
+  opacity:0.8;
+}
+
+/* Card color accents */
+.card-gun { border-color:#4da3ff; box-shadow:0 0 10px rgba(77,163,255,0.4); }
+.card-double { border-color:#ff7b4d; box-shadow:0 0 10px rgba(255,123,77,0.4); }
+.card-aura { border-color:#9b5dff; box-shadow:0 0 10px rgba(155,93,255,0.4); }
+.card-meteor { border-color:#ff4d7a; box-shadow:0 0 10px rgba(255,77,122,0.4); }
+
+/* Level up flash text */
+#lvlupFlash {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%) scale(0);
+  font-size:40px;
+  color:#ffea6b;
+  text-shadow:0 0 18px #fff;
+  z-index:19;
+  pointer-events:none;
+}
+
+/* Simple mobile hint */
+#hint {
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#aaa;
+  font-size:11px;
+  text-shadow:0 0 6px #000;
+  z-index:9;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.min.js"></script>
 </head>
 <body>
-
-  <div id="game-container"></div>
-  <div id="ui-layer">
-    <div class="hud-top">
-      <div class="bar-container"><div class="bar-fill" id="hp-fill"></div></div>
-      <div class="stat-text" id="hp-text">HP: 100/100</div>
-      <div class="bar-container" style="border-color: #4ECDC4;"><div class="bar-fill" id="exp-fill"></div></div>
-      <div class="stat-text" id="lvl-text" style="color: #4ECDC4;">LVL: 1</div>
-      <div class="stat-text" id="score-text" style="color: #9370DB;">KILLS: 0</div>
-    </div>
-    <div id="joystick-zone"></div>
+<div id="hud">
+  <div class="hud-row">
+    <span>HP: <span id="hp">100</span></span>
+    <span>| LVL: <span id="lvl">1</span></span>
+    <span>| KILLS: <span id="kills">0</span></span>
   </div>
-
-  <div id="levelup-modal">
-    <div class="modal-content">
-      <h2>LEVEL UP!</h2>
-      <div id="upgrade-list"></div>
-    </div>
+  <div class="hud-row">
+    <span>EXP:</span>
+    <div id="expStar"></div>
   </div>
+</div>
 
-  <script type="importmap">
-    { "imports": { "three": "https://unpkg.com/three@0.176.0/build/three.module.js" } }
-  </script>
+<div id="lvlupFlash">❗️💥 LEVEL UP ❗️💥</div>
 
-  <script type="module">
-    import * as THREE from 'three';
+<div id="levelUpOverlay">
+  <div id="levelUpTitle">LEVEL UP</div>
+  <div id="levelUpCards"></div>
+</div>
 
-    const COLORS = {
-      bg: 0xFFF0F5, player: 0x4ECDC4, enemySquare: 0xFF69B4,
-      enemyTriangle: 0xFFD700, enemyRound: 0x9370DB, ground: 0x7CFC00,
-      forest: 0x98FB98, lake: 0x1E90FF, cabin: 0xDEB887, exp: 0x00FFFF
-    };
+<div id="hint">Swipe för dash • Du rör dig med virtuella knappar (WASD på dator)</div>
 
-    let scene, camera, renderer, player;
-    let enemies = [], projectiles = [], expGems = [], particles = [], meteors = [];
-    let isPaused = false, isGameOver = false, frameCount = 0, gameTime = 0;
-    const joystick = { x: 0, y: 0, active: false, originX: 0, originY: 0 };
-    const playerStats = { lvl: 1, exp: 0, expReq: 20, hp: 100, maxHp: 100, strength: 1, armor: 0, walkSpeed: 25, kills: 0, damage: 1, atkSpeed: 1, critChance: 0.1, critDmg: 1.5 };
-    const weapons = { gun: { active: true, damage: 15, cooldown: 1000, lastShot: 0, range: 12 }, sword: { active: false, damage: 30, cooldown: 1500, lastShot: 0, range: 3.5 }, aura: { active: false, damage: 5, cooldown: 500, lastShot: 0, range: 4 }, meteor: { active: false, damage: 60, cooldown: 2500, lastShot: 0, area: 5 } };
+<script>
+/* ---------- CORE GAME STATE ---------- */
+let scene, camera, renderer;
+let player, auraMesh;
+let enemies = [];
+let bullets = [];
+let meteors = [];
+let expGems = [];
+let puddles = [];
+let particles = [];
 
-    // --- NEW: PARTICLE CLASS ---
-    class Particle {
-      constructor(pos, color, scale = 0.2) {
-        const geo = new THREE.BoxGeometry(scale, scale, scale);
-        const mat = new THREE.MeshBasicMaterial({ color: color });
-        this.mesh = new THREE.Mesh(geo, mat);
-        this.mesh.position.copy(pos);
-        scene.add(this.mesh);
-        this.vel = new THREE.Vector3((Math.random()-0.5)*0.3, Math.random()*0.3, (Math.random()-0.5)*0.3);
-        this.life = 30 + Math.random()*20;
+let lvl = 1;
+let kills = 0;
+let hp = 100;
+let exp = 0;
+let expToNext = 10;
+
+let swipeStart = null;
+let keys = {};
+let slowMotion = false;
+let slowMotionFactor = 1;
+let baseDelta = 1/60;
+
+let playerWeapons = {
+  gunLevel: 0,
+  doubleGunLevel: 0,
+  auraLevel: 0,
+  meteorLevel: 0
+};
+
+let lastEnemySpawn = 0;
+let enemySpawnInterval = 2; // seconds
+let timeAccumulator = 0;
+
+let lastShotTime = 0;
+let shotInterval = 0.6;
+
+let auraDamageTimer = 0;
+
+let cameraBasePos = { x:0, y:30, z:30 };
+let cameraZoomed = false;
+
+const levelUpOverlay = document.getElementById('levelUpOverlay');
+const levelUpCardsContainer = document.getElementById('levelUpCards');
+const lvlupFlash = document.getElementById('lvlupFlash');
+const expStar = document.getElementById('expStar');
+
+const hpSpan = document.getElementById('hp');
+const lvlSpan = document.getElementById('lvl');
+const killsSpan = document.getElementById('kills');
+
+/* ---------- INIT ---------- */
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x050509);
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.set(cameraBasePos.x, cameraBasePos.y, cameraBasePos.z);
+  camera.lookAt(0,0,0);
+
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  document.body.appendChild(renderer.domElement);
+
+  // Lights
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  dirLight.position.set(15,25,10);
+  scene.add(dirLight);
+  scene.add(new THREE.AmbientLight(0x404060, 0.8));
+
+  // Ground (snyggare, utan rutnät)
+  const groundGeo = new THREE.CircleGeometry(80, 64);
+  const groundMat = new THREE.MeshStandardMaterial({
+    color:0x111522,
+    roughness:0.9,
+    metalness:0.05
+  });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI/2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Subtle ground gradient ring
+  const ringGeo = new THREE.RingGeometry(60, 79, 64);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color:0x1b2740,
+    transparent:true,
+    opacity:0.7
+  });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = -Math.PI/2;
+  scene.add(ring);
+
+  // Player
+  const pGeo = new THREE.SphereGeometry(1.2, 24, 24);
+  const pMat = new THREE.MeshStandardMaterial({
+    color:0x3b8cff,
+    roughness:0.3,
+    metalness:0.4,
+    emissive:0x1b4cff,
+    emissiveIntensity:0.4
+  });
+  player = new THREE.Mesh(pGeo, pMat);
+  player.position.set(0,1.2,0);
+  player.speed = 10;
+  player.dashCooldown = 0;
+  player.castShadow = true;
+  scene.add(player);
+
+  // Aura (osynlig tills man väljer den)
+  const auraGeo = new THREE.RingGeometry(2.5, 2.8, 32);
+  const auraMat = new THREE.MeshBasicMaterial({
+    color:0x9b5dff,
+    transparent:true,
+    opacity:0.0,
+    side:THREE.DoubleSide
+  });
+  auraMesh = new THREE.Mesh(auraGeo, auraMat);
+  auraMesh.rotation.x = -Math.PI/2;
+  auraMesh.position.y = 0.05;
+  scene.add(auraMesh);
+
+  // Input
+  window.addEventListener('resize', onResize);
+  window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+  window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+  // Touch swipe dash
+  window.addEventListener('touchstart', e => { swipeStart = e.touches[0]; });
+  window.addEventListener('touchend', e => {
+    if(!swipeStart) return;
+    const swipeEnd = e.changedTouches[0];
+    const dx = swipeEnd.clientX - swipeStart.clientX;
+    const dy = swipeEnd.clientY - swipeStart.clientY;
+    dash(dx, dy);
+    swipeStart = null;
+  });
+
+  // Start with basic gun
+  playerWeapons.gunLevel = 1;
+
+  animate(0);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ---------- DASH ---------- */
+function dash(dx, dy) {
+  if(player.dashCooldown>0) return;
+  const length = Math.sqrt(dx*dx + dy*dy);
+  if(length<20) return;
+  const dirX = dx/length;
+  const dirZ = -dy/length;
+  player.position.x += dirX*6;
+  player.position.z += dirZ*6;
+  player.dashCooldown = 0.6; // seconds
+
+  // Squash & stretch
+  spawnPulse(player.position, player.material.color.getHex());
+}
+
+/* ---------- ENEMY SPAWN ---------- */
+function spawnEnemy() {
+  const types = [
+    { color:0xff4d4d, size:1.1, speed:4 },
+    { color:0x4dff88, size:1.0, speed:3.5 },
+    { color:0xffd94d, size:0.9, speed:4.5 }
+  ];
+  const t = types[Math.floor(Math.random()*types.length)];
+
+  const geo = new THREE.SphereGeometry(t.size, 16, 16);
+  const mat = new THREE.MeshStandardMaterial({
+    color:t.color,
+    roughness:0.5,
+    metalness:0.2
+  });
+  const enemy = new THREE.Mesh(geo, mat);
+
+  const angle = Math.random()*Math.PI*2;
+  const radius = 50 + Math.random()*10;
+  enemy.position.set(Math.cos(angle)*radius, t.size, Math.sin(angle)*radius);
+
+  enemy.speed = t.speed;
+  enemy.maxHP = 3;
+  enemy.hp = enemy.maxHP;
+  enemy.baseColor = t.color;
+
+  scene.add(enemy);
+  enemies.push(enemy);
+}
+
+/* ---------- BULLETS ---------- */
+function spawnBullet(doubleBarrel=false) {
+  const now = performance.now()/1000;
+  if(now - lastShotTime < shotInterval) return;
+  lastShotTime = now;
+
+  const dirs = [];
+  dirs.push(new THREE.Vector3(0,0,-1)); // forward
+  if(doubleBarrel) {
+    dirs.push(new THREE.Vector3(0.15,0,-1).normalize());
+    dirs.push(new THREE.Vector3(-0.15,0,-1).normalize());
+  }
+
+  dirs.forEach(dir => {
+    const geo = new THREE.SphereGeometry(0.25, 8, 8);
+    const mat = new THREE.MeshBasicMaterial({color:0x4da3ff});
+    const bullet = new THREE.Mesh(geo, mat);
+    bullet.position.copy(player.position);
+    bullet.position.y = 1.2;
+    bullet.dir = dir.clone();
+    bullet.speed = 30;
+    bullet.life = 2;
+    scene.add(bullet);
+    bullets.push(bullet);
+  });
+}
+
+/* ---------- METEOR ---------- */
+function spawnMeteor() {
+  const geo = new THREE.SphereGeometry(1.2, 12, 12);
+  const mat = new THREE.MeshStandardMaterial({
+    color:0xff4d7a,
+    emissive:0x8b1230,
+    emissiveIntensity:0.6,
+    roughness:0.4
+  });
+  const meteor = new THREE.Mesh(geo, mat);
+  const angle = Math.random()*Math.PI*2;
+  const radius = 25;
+  meteor.position.set(Math.cos(angle)*radius, 25, Math.sin(angle)*radius);
+  meteor.target = new THREE.Vector3(0,0,0);
+  meteor.speed = 25;
+  meteor.life = 3;
+  scene.add(meteor);
+  meteors.push(meteor);
+}
+
+/* ---------- EXP GEM ---------- */
+function spawnExpGem(pos, color) {
+  const geo = new THREE.OctahedronGeometry(0.4, 0);
+  const mat = new THREE.MeshStandardMaterial({
+    color:color || 0xffd94d,
+    emissive:color || 0xffd94d,
+    emissiveIntensity:0.4,
+    metalness:0.3,
+    roughness:0.3
+  });
+  const gem = new THREE.Mesh(geo, mat);
+  gem.position.copy(pos);
+  gem.position.y = 0.6;
+  gem.collectRadius = 1.2;
+  gem.value = 1;
+  gem.spin = Math.random()*Math.PI*2;
+  scene.add(gem);
+  expGems.push(gem);
+}
+
+/* ---------- PUDDLE (SPLAT) ---------- */
+function spawnPuddle(pos, color) {
+  const geo = new THREE.CircleGeometry(1.2 + Math.random()*0.6, 16);
+  const mat = new THREE.MeshBasicMaterial({
+    color:color,
+    transparent:true,
+    opacity:0.7
+  });
+  const puddle = new THREE.Mesh(geo, mat);
+  puddle.rotation.x = -Math.PI/2;
+  puddle.position.set(pos.x, 0.02, pos.z);
+  puddle.life = 4;
+  puddle.maxLife = 4;
+  scene.add(puddle);
+  puddles.push(puddle);
+}
+
+/* ---------- PULSE EFFECT ---------- */
+function spawnPulse(pos, color) {
+  const geo = new THREE.RingGeometry(0.5, 0.7, 32);
+  const mat = new THREE.MeshBasicMaterial({
+    color:color,
+    transparent:true,
+    opacity:0.7,
+    side:THREE.DoubleSide
+  });
+  const pulse = new THREE.Mesh(geo, mat);
+  pulse.rotation.x = -Math.PI/2;
+  pulse.position.set(pos.x, 0.05, pos.z);
+  pulse.life = 0.4;
+  pulse.maxLife = 0.4;
+  scene.add(pulse);
+  particles.push(pulse);
+}
+
+/* ---------- LEVEL / EXP ---------- */
+function addExp(amount) {
+  exp += amount;
+  updateExpStar();
+  if(exp >= expToNext) {
+    exp -= expToNext;
+    levelUp();
+  }
+}
+
+function updateExpStar() {
+  const scale = 1 + (lvl-1)*0.2; // +20% per level
+  expStar.style.transform = `scale(${scale})`;
+}
+
+/* ---------- LEVEL UP ---------- */
+function levelUp() {
+  lvl++;
+  lvlSpan.textContent = lvl;
+
+  hp += 5 + Math.floor(Math.random()*3);
+  hpSpan.textContent = hp;
+
+  expToNext = Math.floor(expToNext * 1.25);
+
+  // Flash text
+  lvlupFlash.style.transition = 'none';
+  lvlupFlash.style.transform = 'translate(-50%, -50%) scale(0)';
+  requestAnimationFrame(() => {
+    lvlupFlash.style.transition = 'transform 0.35s ease-out';
+    lvlupFlash.style.transform = 'translate(-50%, -50%) scale(1.4)';
+    setTimeout(() => {
+      lvlupFlash.style.transform = 'translate(-50%, -50%) scale(0)';
+    }, 500);
+  });
+
+  playLevelUpSound(lvl <= 2 ? 0 : 1);
+
+  // Slow motion + camera zoom
+  enterLevelUpState();
+
+  // Show weapon choices at 5,10,15,20
+  if([5,10,15,20].includes(lvl)) {
+    showWeaponChoice();
+  }
+}
+
+/* ---------- LEVEL UP STATE ---------- */
+function enterLevelUpState() {
+  slowMotion = true;
+  slowMotionFactor = 0.25;
+
+  if(!cameraZoomed) {
+    cameraZoomed = true;
+    camera.position.y = cameraBasePos.y * 0.6;
+    camera.position.z = cameraBasePos.z * 0.6;
+  }
+}
+
+function exitLevelUpState() {
+  slowMotion = false;
+  slowMotionFactor = 1;
+  if(cameraZoomed) {
+    cameraZoomed = false;
+    camera.position.y = cameraBasePos.y;
+    camera.position.z = cameraBasePos.z;
+  }
+}
+
+/* ---------- WEAPON CHOICE UI ---------- */
+function showWeaponChoice() {
+  levelUpCardsContainer.innerHTML = '';
+
+  const options = buildWeaponOptionsForLevel(lvl);
+
+  options.forEach(opt => {
+    const card = document.createElement('div');
+    card.className = 'level-card ' + opt.className;
+
+    const title = document.createElement('div');
+    title.className = 'level-card-title';
+    title.textContent = opt.title;
+
+    const desc = document.createElement('div');
+    desc.className = 'level-card-desc';
+    desc.textContent = opt.desc;
+
+    card.appendChild(title);
+    card.appendChild(desc);
+
+    card.addEventListener('click', () => {
+      opt.apply();
+      hideWeaponChoice();
+    });
+
+    levelUpCardsContainer.appendChild(card);
+
+    // animate in
+    requestAnimationFrame(() => {
+      card.style.opacity = '1';
+      card.style.transform = 'scale(1)';
+    });
+  });
+
+  levelUpOverlay.style.display = 'flex';
+}
+
+function hideWeaponChoice() {
+  levelUpOverlay.style.display = 'none';
+  exitLevelUpState();
+}
+
+function buildWeaponOptionsForLevel(level) {
+  const opts = [];
+
+  // Always at least one gun upgrade
+  opts.push({
+    title: playerWeapons.gunLevel === 0 ? 'Gun' : 'Gun +',
+    desc: playerWeapons.gunLevel === 0
+      ? 'Skjut enkla projektiler mot fiender.'
+      : 'Ökar skottfart och skada.',
+    className: 'card-gun',
+    apply: () => {
+      playerWeapons.gunLevel++;
+      shotInterval = Math.max(0.25, shotInterval - 0.05);
+    }
+  });
+
+  // Double barrel
+  opts.push({
+    title: playerWeapons.doubleGunLevel === 0 ? 'Double Barrel' : 'Double Barrel +',
+    desc: playerWeapons.doubleGunLevel === 0
+      ? 'Skjut två extra skott åt sidorna.'
+      : 'Ökar skada och spridning.',
+    className: 'card-double',
+    apply: () => {
+      playerWeapons.doubleGunLevel++;
+    }
+  });
+
+  // Aura
+  opts.push({
+    title: playerWeapons.auraLevel === 0 ? 'Aura' : 'Aura +',
+    desc: playerWeapons.auraLevel === 0
+      ? 'En skadlig aura runt dig.'
+      : 'Större aura och mer skada.',
+    className: 'card-aura',
+    apply: () => {
+      playerWeapons.auraLevel++;
+      auraMesh.material.opacity = 0.35 + playerWeapons.auraLevel*0.05;
+      auraMesh.scale.setScalar(1 + playerWeapons.auraLevel*0.2);
+    }
+  });
+
+  // Meteor (från lvl 10 och uppåt)
+  if(level >= 10) {
+    opts.push({
+      title: playerWeapons.meteorLevel === 0 ? 'Meteor' : 'Meteor +',
+      desc: playerWeapons.meteorLevel === 0
+        ? 'Släpper ner meteorer på fiender.'
+        : 'Fler meteorer och mer skada.',
+      className: 'card-meteor',
+      apply: () => {
+        playerWeapons.meteorLevel++;
       }
-      update() {
-        this.life--;
-        this.mesh.position.add(this.vel);
-        this.vel.y -= 0.015; // Gravity
-        if(this.mesh.position.y < 0.1) { this.mesh.position.y = 0.1; this.vel.set(0,0,0); }
-        if(this.life <= 0) { scene.remove(this.mesh); return false; }
-        return true;
-      }
+    });
+  }
+
+  // Plocka max 3–4 kort
+  while(opts.length > 4) opts.pop();
+  return opts;
+}
+
+/* ---------- LEVEL UP SOUND ---------- */
+function playLevelUpSound(type) {
+  const audio = new Audio();
+  if(type===0) audio.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
+  else audio.src="https://actions.google.com/sounds/v1/cartoon/metal_twang.ogg";
+  audio.play();
+}
+
+/* ---------- ANIMATE LOOP ---------- */
+let lastTime = 0;
+function animate(timestamp) {
+  requestAnimationFrame(animate);
+
+  const dtRaw = (timestamp - lastTime) / 1000 || baseDelta;
+  lastTime = timestamp;
+  const dt = dtRaw * slowMotionFactor;
+
+  timeAccumulator += dt;
+
+  // Player dash cooldown
+  if(player.dashCooldown > 0) {
+    player.dashCooldown -= dt;
+    if(player.dashCooldown < 0) player.dashCooldown = 0;
+  }
+
+  // Player movement (WASD)
+  handlePlayerMovement(dt);
+
+  // Enemy spawn
+  if(timeAccumulator - lastEnemySpawn > enemySpawnInterval) {
+    spawnEnemy();
+    lastEnemySpawn = timeAccumulator;
+    enemySpawnInterval = Math.max(0.6, enemySpawnInterval * 0.98);
+  }
+
+  // Enemies move toward player
+  enemies.forEach((e, idx) => {
+    const dir = new THREE.Vector3().subVectors(player.position, e.position);
+    const dist = dir.length();
+    dir.normalize();
+    e.position.addScaledVector(dir, e.speed * dt);
+
+    // Simple collision damage
+    if(dist < 1.5) {
+      hp -= 10*dt;
+      if(hp < 0) hp = 0;
+      hpSpan.textContent = Math.floor(hp);
+    }
+  });
+
+  // Bullets
+  bullets = bullets.filter(b => {
+    b.position.addScaledVector(b.dir, b.speed*dt);
+    b.life -= dt;
+    if(b.life <= 0) {
+      scene.remove(b);
+      return false;
     }
 
-    class Player {
-      constructor() {
-        this.mesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshToonMaterial({ color: COLORS.player }));
-        this.mesh.position.y = 0.5;
-        scene.add(this.mesh);
-        this.isDashing = false; this.dashTime = 0; this.dashVec = new THREE.Vector3();
-      }
-      update(dt) {
-        if (joystick.active) {
-          const speed = 0.12 * (playerStats.walkSpeed / 25);
-          this.mesh.position.x += joystick.x * speed;
-          this.mesh.position.z += joystick.y * speed;
-          this.mesh.rotation.y = Math.atan2(joystick.x, joystick.y);
-          const s = 1 + (0.12 * 2); this.mesh.scale.set(1/Math.sqrt(s), 1/Math.sqrt(s), s);
-        } else { this.mesh.scale.set(1,1,1); }
-        camera.position.set(this.mesh.position.x, 20, this.mesh.position.z + 20);
-        camera.lookAt(this.mesh.position);
-      }
-      takeDamage(amount) {
-        playerStats.hp -= amount * (1 - playerStats.armor/100);
-        updateUI();
-        for(let i=0; i<5; i++) particles.push(new Particle(this.mesh.position, COLORS.player));
-        if (playerStats.hp <= 0) location.reload();
-      }
-    }
-
-    class Enemy {
-      constructor(type, x, z) {
-        this.type = type;
-        this.color = type === 0 ? COLORS.enemySquare : (type === 1 ? COLORS.enemyTriangle : COLORS.enemyRound);
-        let geo = type === 0 ? new THREE.BoxGeometry(0.8,0.8,0.8) : (type === 1 ? new THREE.ConeGeometry(0.5,1,8) : new THREE.SphereGeometry(0.5,12,12));
-        this.mesh = new THREE.Mesh(geo, new THREE.MeshToonMaterial({ color: this.color }));
-        this.mesh.position.set(x, 0.5, z);
-        scene.add(this.mesh);
-        this.hp = type === 0 ? 150 : (type === 1 ? 40 : 80);
-        this.speed = type === 1 ? 0.08 : 0.05;
-      }
-      update() {
-        const dir = new THREE.Vector3().subVectors(player.mesh.position, this.mesh.position).normalize();
-        this.mesh.position.add(dir.multiplyScalar(this.speed));
-        if(this.mesh.position.distanceTo(player.mesh.position) < 1) player.takeDamage(0.5);
-      }
-      // --- UPGRADED: TAKE DAMAGE WITH FX ---
-      takeDamage(amount) {
-        this.hp -= amount;
-        createDamageNumber(Math.floor(amount), this.mesh.position);
-        
-        // FX: Hit Flash
-        const orig = this.mesh.material.color.getHex();
-        this.mesh.material.color.setHex(0xFFFFFF);
-        setTimeout(() => { if(this.mesh) this.mesh.material.color.setHex(orig); }, 50);
-
-        // FX: Hit Particles (Drops)
-        for(let i=0; i<4; i++) particles.push(new Particle(this.mesh.position, this.color, 0.15));
-
-        if (this.hp <= 0) {
-          // FX: Death Explosion
-          for(let i=0; i<12; i++) particles.push(new Particle(this.mesh.position, this.color, 0.25));
-          this.die();
+    // Hit enemies
+    for(let i=enemies.length-1;i>=0;i--) {
+      const e = enemies[i];
+      const dist = b.position.distanceTo(e.position);
+      if(dist < 1.2) {
+        e.hp -= 1 + playerWeapons.gunLevel*0.3 + playerWeapons.doubleGunLevel*0.4;
+        spawnPulse(e.position, e.baseColor);
+        scene.remove(b);
+        bullets.splice(bullets.indexOf(b),1);
+        if(e.hp <= 0) {
+          killEnemy(i);
         }
-      }
-      die() {
-        scene.remove(this.mesh);
-        enemies = enemies.filter(e => e !== this);
-        spawnExp(this.mesh.position);
-        playerStats.kills++;
-        updateUI();
+        return false;
       }
     }
+    return true;
+  });
 
-    // --- FUNCTIONS ---
-    function spawnExp(pos) {
-      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.3), new THREE.MeshToonMaterial({ color: COLORS.exp }));
-      gem.position.set(pos.x, 0.5, pos.z);
-      scene.add(gem);
-      expGems.push(gem);
-    }
+  // Aura damage
+  if(playerWeapons.auraLevel > 0) {
+    auraDamageTimer += dt;
+    auraMesh.position.x = player.position.x;
+    auraMesh.position.z = player.position.z;
+    auraMesh.material.opacity = 0.25 + 0.1*Math.sin(timestamp*0.005);
 
-    function createDamageNumber(amt, pos) {
-      const div = document.createElement('div'); div.className = 'damage-number'; div.innerText = amt;
-      const v = pos.clone().project(camera);
-      div.style.left = (v.x*.5+.5)*window.innerWidth+'px'; div.style.top = (-(v.y*.5)+.5)*window.innerHeight+'px';
-      document.body.appendChild(div); setTimeout(() => div.remove(), 1000);
-    }
-
-    function updateUI() {
-      document.getElementById('hp-fill').style.width = (playerStats.hp/playerStats.maxHp)*100+"%";
-      document.getElementById('exp-fill').style.width = (playerStats.exp/playerStats.expReq)*100+"%";
-      document.getElementById('score-text').innerText = "KILLS: " + playerStats.kills;
-    }
-
-    // --- MAIN ---
-    function init() {
-      scene = new THREE.Scene(); scene.background = new THREE.Color(COLORS.bg);
-      camera = new THREE.OrthographicCamera(-20, 20, 20, -20, 1, 1000);
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.getElementById('game-container').appendChild(renderer.domElement);
-      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshToonMaterial({ color: COLORS.ground }));
-      ground.rotation.x = -Math.PI/2; scene.add(ground);
-      player = new Player();
-      setupInputs();
-      animate();
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-      if(isPaused) return;
-      frameCount++; gameTime += 0.016;
-      player.update(0.016);
-      
-      if(frameCount % 300 === 0) {
-        const a = Math.random()*Math.PI*2;
-        enemies.push(new Enemy(Math.floor(Math.random()*3), player.mesh.position.x+Math.cos(a)*25, player.mesh.position.z+Math.sin(a)*25));
-      }
-
-      // Gun Weapon Logic
-      if(frameCount % 60 === 0 && enemies.length > 0) {
-        enemies[0].takeDamage(weapons.gun.damage * playerStats.strength);
-      }
-
-      enemies.forEach(e => e.update());
-      particles = particles.filter(p => p.update() !== false);
-      expGems.forEach(g => {
-        if(g.position.distanceTo(player.mesh.position) < 1) {
-          scene.remove(g); expGems = expGems.filter(gem => gem !== g);
-          playerStats.exp += 10; if(playerStats.exp >= playerStats.expReq) { playerStats.lvl++; playerStats.exp = 0; }
-          updateUI();
+    if(auraDamageTimer > 0.4) {
+      auraDamageTimer = 0;
+      const auraRadius = 2.5 * (1 + playerWeapons.auraLevel*0.2);
+      enemies.forEach((e, idx) => {
+        const dist = e.position.distanceTo(player.position);
+        if(dist < auraRadius) {
+          e.hp -= 0.8 + playerWeapons.auraLevel*0.5;
+          spawnPulse(e.position, 0x9b5dff);
+          if(e.hp <= 0) {
+            killEnemy(idx);
+          }
         }
       });
-
-      renderer.render(scene, camera);
     }
+  }
 
-    function setupInputs() {
-      const zone = document.getElementById('joystick-zone');
-      zone.addEventListener('touchstart', e => { joystick.active = true; joystick.originX = e.touches[0].clientX; joystick.originY = e.touches[0].clientY; });
-      window.addEventListener('touchmove', e => {
-        if(!joystick.active) return;
-        const dx = e.touches[0].clientX - joystick.originX; const dy = e.touches[0].clientY - joystick.originY;
-        const d = Math.sqrt(dx*dx+dy*dy); joystick.x = dx/Math.max(d,1); joystick.y = dy/Math.max(d,1);
+  // Meteors
+  if(playerWeapons.meteorLevel > 0 && Math.random() < 0.01*playerWeapons.meteorLevel) {
+    spawnMeteor();
+  }
+  meteors = meteors.filter(m => {
+    const dir = new THREE.Vector3().subVectors(m.target, m.position);
+    const dist = dir.length();
+    dir.normalize();
+    m.position.addScaledVector(dir, m.speed*dt);
+    m.life -= dt;
+    if(dist < 1.5 || m.life <= 0) {
+      // Damage nearby enemies
+      enemies.forEach((e, idx) => {
+        const d = e.position.distanceTo(m.position);
+        if(d < 4) {
+          e.hp -= 3 + playerWeapons.meteorLevel*1.5;
+          spawnPulse(e.position, 0xff4d7a);
+          if(e.hp <= 0) {
+            killEnemy(idx);
+          }
+        }
       });
-      window.addEventListener('touchend', () => { joystick.active = false; joystick.x = 0; joystick.y = 0; });
+      spawnPuddle(m.position, 0x5b0b1f);
+      scene.remove(m);
+      return false;
     }
+    return true;
+  });
 
-    init();
-  </script>
+  // EXP gems
+  expGems = expGems.filter(g => {
+    g.spin += dt*3;
+    g.rotation.y = g.spin;
+
+    const dist = g.position.distanceTo(player.position);
+    if(dist < 6) {
+      const dir = new THREE.Vector3().subVectors(player.position, g.position).normalize();
+      g.position.addScaledVector(dir, dt*10);
+    }
+    if(dist < g.collectRadius) {
+      addExp(g.value);
+      scene.remove(g);
+      return false;
+    }
+    return true;
+  });
+
+  // Puddles
+  puddles = puddles.filter(p => {
+    p.life -= dt;
+    const t = p.life / p.maxLife;
+    p.material.opacity = 0.7 * t;
+    p.scale.setScalar(1 + (1-t)*0.4);
+    if(p.life <= 0) {
+      scene.remove(p);
+      return false;
+    }
+    return true;
+  });
+
+  // Particles (pulses)
+  particles = particles.filter(p => {
+    p.life -= dt;
+    const t = p.life / p.maxLife;
+    p.material.opacity = 0.7 * t;
+    p.scale.setScalar(1 + (1-t)*1.2);
+    if(p.life <= 0) {
+      scene.remove(p);
+      return false;
+    }
+    return true;
+  });
+
+  // Auto shooting
+  if(playerWeapons.gunLevel > 0) {
+    const doubleBarrelActive = playerWeapons.doubleGunLevel > 0;
+    spawnBullet(doubleBarrelActive);
+  }
+
+  // Simple player squash
+  player.scale.y = 1 + 0.1*Math.sin(timestamp*0.01);
+
+  renderer.render(scene, camera);
+}
+
+/* ---------- PLAYER MOVEMENT ---------- */
+function handlePlayerMovement(dt) {
+  let moveX = 0;
+  let moveZ = 0;
+  if(keys['w'] || keys['arrowup']) moveZ -= 1;
+  if(keys['s'] || keys['arrowdown']) moveZ += 1;
+  if(keys['a'] || keys['arrowleft']) moveX -= 1;
+  if(keys['d'] || keys['arrowright']) moveX += 1;
+
+  const len = Math.hypot(moveX, moveZ);
+  if(len > 0) {
+    moveX /= len;
+    moveZ /= len;
+    player.position.x += moveX * player.speed * dt;
+    player.position.z += moveZ * player.speed * dt;
+  }
+}
+
+/* ---------- ENEMY DEATH ---------- */
+function killEnemy(index) {
+  const e = enemies[index];
+  if(!e) return;
+  kills++;
+  killsSpan.textContent = kills;
+
+  spawnPuddle(e.position, e.baseColor);
+  spawnExpGem(e.position, e.baseColor);
+
+  scene.remove(e);
+  enemies.splice(index,1);
+}
+
+/* ---------- START ---------- */
+try {
+  init();
+} catch(e) {
+  console.error(e);
+  alert("Game Error: " + e.message);
+}
+</script>
 </body>
 </html>
