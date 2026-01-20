@@ -1,51 +1,44 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Game Level-Up</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Game</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .level-up-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            color: yellow;
-            opacity: 1;
-            transition: opacity 1s ease-out;
-        }
-        .fountain {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 100px;
-            background: linear-gradient(to top, rgba(255, 223, 186, 0.5), transparent);
-            animation: fountain-animation 3s infinite;
-        }
-        @keyframes fountain-animation {
-            0% { background-color: transparent; }
-            50% { background-color: rgba(255, 223, 186, 0.5); }
-            100% { background-color: transparent; }
-        }
+        body { background: black; color: white; font-family: Arial, sans-serif; }
+        #gameArea { width: 100vw; height: 100vh; position: relative; }
     </style>
 </head>
 <body>
-    <div class="fountain"></div>
+    <h1 style="text-align:center;">Welcome to the Arcade Game!</h1>
+    <div id="gameArea"></div>
     <script>
-        function createLevelUpText() {
-            const textElement = document.createElement('div');
-            textElement.className = 'level-up-text';
-            textElement.innerText = 'Level Up!';
-            document.body.appendChild(textElement);
-            setTimeout(() => {
-                textElement.style.opacity = 0;
-            }, 1000);
-            setTimeout(() => {
-                document.body.removeChild(textElement);
-            }, 2000);
+        // 3D Game Mechanics and Logic
+        const gameArea = document.getElementById('gameArea');
+
+        function initGame() {
+            // Setup 3D Environment
+            // Initialize variables for gameplay: player position, score, etc.
         }
 
-        // Simulate level up
-        setTimeout(createLevelUpText, 5000);
+        function drawFlyingText(message) {
+            const text = document.createElement('div');
+            text.innerText = message;
+            text.style.position = 'absolute';
+            text.style.animation = 'fly 3s forwards';
+            gameArea.appendChild(text);
+
+            // Remove the text after animation
+            setTimeout(() => text.remove(), 3000);
+        }
+
+        function levelUp() {
+            drawFlyingText('Level Up!');
+            // Implement level-up mechanics (increase score, difficulty, etc.)
+        }
+
+        // Add event listeners and game loops
+        initGame();
     </script>
 </body>
 </html>
