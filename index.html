@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Water Drop Survivor - Updated</title>
+  <title>Water Drop Survivor - Enhanced</title>
   <style>
     body {
       margin: 0;
@@ -18,132 +18,119 @@
 
     #game-container {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       z-index: 1;
     }
 
     #ui-layer {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       z-index: 10;
       pointer-events: none;
-    }
-
-    /* HUD Elements */
-    .hud-top {
-      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      justify-content: space-between;
     }
 
+    .hud-top { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
     .bar-container {
-      width: 180px;
-      height: 16px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      border: 2px solid #fff;
-      overflow: hidden;
-      position: relative;
+      width: 200px; height: 20px; background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px; border: 2px solid #fff; overflow: hidden; position: relative;
     }
-
-    .bar-fill {
-      height: 100%;
-      width: 100%;
-      transition: width 0.3s ease;
-    }
-
+    .bar-fill { height: 100%; width: 100%; transition: width 0.2s; }
     #hp-fill { background: #FF69B4; }
     #exp-fill { background: #4ECDC4; }
-
     .stat-text {
-      color: #fff;
-      font-weight: bold;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-      font-size: 14px;
+      color: #fff; font-weight: bold; font-size: 14px;
+      text-shadow: 2px 2px 0 #000;
     }
 
-    /* Joystick Area */
+    /* JOYSTICK - Synlig längst ner */
     #joystick-zone {
       position: absolute;
-      bottom: 40px;
-      left: 50%;
+      bottom: 50px; left: 50%;
       transform: translateX(-50%);
-      width: 120px;
-      height: 120px;
+      width: 150px; height: 150px;
       background: rgba(255, 255, 255, 0.1);
+      border: 3px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
-      border: 2px dashed rgba(255,255,255,0.3);
       pointer-events: auto;
+      touch-action: none;
     }
 
-    /* Modals */
-    #levelup-modal, #gameover-screen, #stats-modal {
+    /* LEVEL UP MODAL - DOPAMIN VERSION */
+    #levelup-modal {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.85);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      pointer-events: auto;
-      z-index: 100;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      pointer-events: auto; z-index: 100;
     }
 
-    .modal-content {
-      background: #fff;
-      padding: 25px;
-      border-radius: 20px;
-      width: 85%;
-      max-width: 350px;
-      text-align: center;
+    #upgrade-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 90%;
+      max-width: 500px;
     }
 
     .upgrade-card {
-      margin: 10px 0;
+      background: #2c2c2c; /* Mörkgrå */
+      border: 3px solid #b22222; /* Röd */
       padding: 15px;
-      border-radius: 12px;
+      border-radius: 15px;
       cursor: pointer;
-      color: white;
-      transition: transform 0.1s;
-      text-align: left;
+      text-align: center;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: popIn 0.4s ease-out;
     }
 
-    .upgrade-card:active { transform: scale(0.96); }
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
 
-    .upgrade-title { font-weight: bold; font-size: 1.1em; }
-    .upgrade-desc { font-size: 0.85em; opacity: 0.9; }
+    .upgrade-card:hover {
+      transform: scale(1.05);
+      background: #3d3d3d;
+    }
 
-    .btn {
-      background: #FF69B4;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 25px;
-      font-weight: bold;
-      margin-top: 15px;
+    .upgrade-title {
+      font-weight: bold; color: #f5f5dc; /* Beige */
+      font-size: 18px; margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .upgrade-desc {
+      font-size: 12px; color: #ff6347; /* Röd-orange */
+      font-style: italic;
     }
 
     .damage-number {
-      position: absolute;
-      color: #FF4500;
-      font-weight: bold;
-      pointer-events: none;
+      position: absolute; color: #fff; font-weight: bold; font-size: 22px;
+      pointer-events: none; text-shadow: 2px 2px 0 #f00;
       animation: floatUp 0.8s forwards;
     }
 
     @keyframes floatUp {
-      0% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(-40px); opacity: 0; }
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-60px) scale(1.2); opacity: 0; }
+    }
+
+    #gameover-screen {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9); display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      pointer-events: auto; z-index: 200; color: white;
+    }
+
+    .btn {
+      background: #b22222; color: #f5f5dc; border: none;
+      padding: 15px 40px; font-size: 20px; border-radius: 50px;
+      margin-top: 20px; font-weight: bold; cursor: pointer;
     }
   </style>
 </head>
@@ -153,34 +140,23 @@
 
   <div id="ui-layer">
     <div class="hud-top">
-      <div class="bar-container"><div id="hp-fill" class="bar-fill"></div></div>
-      <div id="hp-text" class="stat-text">HP: 100/100</div>
-      <div class="bar-container" style="border-color: #4ECDC4;"><div id="exp-fill" class="bar-fill"></div></div>
-      <div id="lvl-text" class="stat-text" style="color: #4ECDC4;">LVL: 1</div>
+      <div class="bar-container"><div class="bar-fill" id="hp-fill"></div></div>
+      <div class="stat-text" id="hp-text">HP: 100/100</div>
+      <div class="bar-container" style="border-color: #4ECDC4;"><div class="bar-fill" id="exp-fill"></div></div>
+      <div class="stat-text" id="lvl-text" style="color: #4ECDC4;">LVL: 1</div>
     </div>
     <div id="joystick-zone"></div>
-    <button id="stats-btn" style="position: absolute; top: 20px; right: 20px; pointer-events: auto; background: none; border: 2px solid #fff; color: #fff; border-radius: 5px; padding: 5px 10px;">STATS</button>
   </div>
 
   <div id="levelup-modal">
-    <div class="modal-content">
-      <h2 style="color: #333;">LEVEL UP!</h2>
-      <div id="upgrade-list"></div>
-    </div>
-  </div>
-
-  <div id="stats-modal">
-    <div class="modal-content">
-      <h2>PLAYER STATS</h2>
-      <div id="stats-content" style="text-align: left; line-height: 1.6;"></div>
-      <button class="btn" onclick="document.getElementById('stats-modal').style.display='none'">CLOSE</button>
-    </div>
+    <h2 style="color: #f5f5dc; margin-bottom: 30px; font-size: 32px; text-shadow: 0 0 10px #b22222;">CHOOSE YOUR POWER</h2>
+    <div id="upgrade-list"></div>
   </div>
 
   <div id="gameover-screen">
-    <h1 style="color: #FF69B4; font-size: 40px;">GAME OVER</h1>
-    <p id="final-score" style="color: white;"></p>
-    <button class="btn" id="restart-btn">RESTART</button>
+    <h1 style="color: #b22222; font-size: 48px;">DEHYDRATED</h1>
+    <p id="final-score">Kills: 0</p>
+    <button class="btn" onclick="location.reload()">TRY AGAIN</button>
   </div>
 
   <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
@@ -195,44 +171,42 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // --- CONFIG & CONSTANTS ---
+    // --- CONFIG ---
     const COLORS = {
       player: 0x4ECDC4,
       ground: 0x7CFC00,
+      lake: 0x1E90FF,
       enemySquare: 0xFF69B4,
       enemyTriangle: 0xFFD700,
       enemyRound: 0x9370DB,
-      forest: 0x228B22,
-      lake: 0x1E90FF,
-      road: 0xD2B48C
+      exp: 0x00FFFF
     };
 
-    let scene, camera, renderer, player;
+    let scene, camera, renderer, playerObj;
     let enemies = [], projectiles = [], expGems = [], particles = [], meteors = [];
-    let isPaused = false, isGameOver = false, frameCount = 0;
+    let isPaused = false, frameCount = 0, gameTime = 0;
     
-    const joystick = { x: 0, y: 0, active: false };
+    const joystick = { x: 0, y: 0, active: false, id: null, originX: 0, originY: 0 };
     const playerStats = {
       lvl: 1, exp: 0, expReq: 20, hp: 100, maxHp: 100,
-      strength: 1, armor: 0, speed: 1.2, critChance: 0.1, critDmg: 1.5,
-      atkSpeed: 1, kills: 0, hpRegen: 0
+      strength: 1, speed: 1, armor: 0, critChance: 0.1, critDmg: 1.5,
+      atkSpeed: 1, kills: 0, walkSpeed: 25, hpRegen: 0
     };
 
     const weapons = {
-      gun: { active: true, damage: 15, cooldown: 1000, lastShot: 0, range: 12 },
-      sword: { active: false, damage: 30, cooldown: 1500, lastShot: 0 },
-      aura: { active: false, damage: 5, cooldown: 500, lastShot: 0, range: 4 },
-      meteor: { active: false, damage: 60, cooldown: 3000, lastShot: 0 }
+      gun: { active: true, damage: 15, cooldown: 1000, lastShot: 0, barrels: 1 },
+      sword: { active: false, damage: 35, cooldown: 1200, lastShot: 0, projectiles: 1 },
+      aura: { active: false, damage: 8, cooldown: 500, lastShot: 0, range: 4, mesh: null },
+      meteor: { active: false, damage: 100, cooldown: 2500, lastShot: 0 }
     };
 
-    // --- INITIALIZATION ---
     function init() {
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xFFF0F5);
-      scene.fog = new THREE.Fog(0xFFF0F5, 20, 60);
+      scene.fog = new THREE.Fog(0xFFF0F5, 20, 65);
 
       const aspect = window.innerWidth / window.innerHeight;
-      const d = 15;
+      const d = 20;
       camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
       camera.position.set(20, 20, 20);
       camera.lookAt(0,0,0);
@@ -242,229 +216,257 @@
       renderer.shadowMap.enabled = true;
       document.getElementById('game-container').appendChild(renderer.domElement);
 
-      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
       scene.add(ambient);
-      const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-      sun.position.set(10, 20, 10);
+      const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+      sun.position.set(50, 100, 50);
       sun.castShadow = true;
       scene.add(sun);
 
-      setupWorld();
-      spawnPlayer();
-      setupControls();
+      createWorld();
+      createPlayer();
+      setupInputs();
       animate(0);
     }
 
-    function setupWorld() {
-      // Ground
+    function createWorld() {
       const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshToonMaterial({ color: COLORS.ground }));
-      ground.rotation.x = -Math.PI/2;
+      ground.rotation.x = -Math.PI / 2;
       ground.receiveShadow = true;
       scene.add(ground);
 
-      // Lake
-      const lake = new THREE.Mesh(new THREE.CircleGeometry(12, 32), new THREE.MeshToonMaterial({ color: COLORS.lake }));
-      lake.rotation.x = -Math.PI/2;
-      lake.position.set(30, 0.05, -30);
+      const lake = new THREE.Mesh(new THREE.CircleGeometry(15, 32), new THREE.MeshToonMaterial({ color: COLORS.lake }));
+      lake.rotation.x = -Math.PI / 2;
+      lake.position.set(30, 0.01, -30);
       scene.add(lake);
 
-      // Windmill
-      const windmill = new THREE.Group();
-      const tower = new THREE.Mesh(new THREE.CylinderGeometry(2, 3, 8), new THREE.MeshToonMaterial({ color: 0xF5F5DC }));
-      tower.position.y = 4;
-      windmill.add(tower);
-      const blades = new THREE.Mesh(new THREE.BoxGeometry(10, 1, 0.5), new THREE.MeshToonMaterial({ color: 0x8B4513 }));
-      blades.position.set(0, 7, 2.1);
-      windmill.add(blades);
-      windmill.position.set(-25, 0, -25);
-      windmill.userData = { isWindmill: true, blades };
-      scene.add(windmill);
-
-      // Road
-      const road = new THREE.Mesh(new THREE.PlaneGeometry(4, 100), new THREE.MeshToonMaterial({ color: COLORS.road }));
-      road.rotation.x = -Math.PI/2;
-      road.position.set(0, 0.02, 0);
-      scene.add(road);
+      // Roads
+      const roadMat = new THREE.MeshBasicMaterial({ color: 0xD2B48C });
+      for(let i=0; i<30; i++) {
+        const road = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), roadMat);
+        road.rotation.x = -Math.PI/2;
+        road.position.set(Math.sin(i*0.5)*20, 0.02, i*4 - 60);
+        scene.add(road);
+      }
     }
 
-    function spawnPlayer() {
-      const geo = new THREE.SphereGeometry(0.6, 16, 16);
+    function createPlayer() {
+      const geo = new THREE.SphereGeometry(0.5, 32, 32);
       const mat = new THREE.MeshToonMaterial({ color: COLORS.player });
-      player = new THREE.Mesh(geo, mat);
-      player.position.y = 0.6;
-      player.castShadow = true;
-      scene.add(player);
+      playerObj = new THREE.Mesh(geo, mat);
+      playerObj.position.y = 0.5;
+      playerObj.castShadow = true;
+      scene.add(playerObj);
     }
 
-    // --- GAME LOGIC ---
-    function setupControls() {
-      const zone = document.getElementById('joystick-zone');
-      zone.addEventListener('touchstart', (e) => { joystick.active = true; });
-      zone.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        const rect = zone.getBoundingClientRect();
-        const cx = rect.left + rect.width/2;
-        const cy = rect.top + rect.height/2;
-        joystick.x = (touch.clientX - cx) / (rect.width/2);
-        joystick.y = (touch.clientY - cy) / (rect.height/2);
-      });
-      zone.addEventListener('touchend', () => { joystick.active = false; joystick.x = 0; joystick.y = 0; });
-
-      document.getElementById('stats-btn').onclick = () => {
-        isPaused = true;
-        const content = document.getElementById('stats-content');
-        content.innerHTML = `HP: ${Math.floor(playerStats.hp)}/${playerStats.maxHp}<br>STR: ${playerStats.strength.toFixed(1)}<br>ARMOR: ${playerStats.armor}%<br>KILLS: ${playerStats.kills}`;
-        document.getElementById('stats-modal').style.display = 'flex';
-      };
-
-      document.getElementById('restart-btn').onclick = () => location.reload();
+    function spawnParticles(pos, color, count, isHit = false) {
+      for(let i=0; i<count; i++) {
+        const pGeo = new THREE.SphereGeometry(isHit ? 0.15 : 0.08);
+        const pMat = new THREE.MeshBasicMaterial({ color: color });
+        const p = new THREE.Mesh(pGeo, pMat);
+        p.position.copy(pos);
+        const vel = new THREE.Vector3((Math.random()-0.5)*0.2, Math.random()*0.2, (Math.random()-0.5)*0.2);
+        if(isHit) vel.multiplyScalar(2);
+        particles.push({ mesh: p, vel: vel, life: 60 });
+        scene.add(p);
+      }
     }
 
-    function spawnEnemy() {
-      const type = Math.floor(Math.random() * 3);
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 20;
-      const ex = player.position.x + Math.cos(angle) * dist;
-      const ez = player.position.z + Math.sin(angle) * dist;
-
-      let geo;
-      if(type === 0) geo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-      else if(type === 1) geo = new THREE.ConeGeometry(0.5, 1, 4);
-      else geo = new THREE.SphereGeometry(0.5, 8, 8);
-
-      const mat = new THREE.MeshToonMaterial({ color: [COLORS.enemySquare, COLORS.enemyTriangle, COLORS.enemyRound][type] });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set(ex, 0.5, ez);
-      scene.add(mesh);
-      enemies.push({ mesh, hp: 100, speed: 0.05, type });
-    }
-
-    function levelUp() {
+    function showLevelUp() {
       isPaused = true;
-      playerStats.lvl++;
-      playerStats.exp = 0;
-      playerStats.expReq += 15;
-      
+      const modal = document.getElementById('levelup-modal');
       const list = document.getElementById('upgrade-list');
       list.innerHTML = '';
-      
-      const pool = [
-        { t: "STRENGTH", d: "Damage +15%", a: () => playerStats.strength += 0.15, c: "#000" },
-        { t: "ARMOR", d: "Defense +10%", a: () => playerStats.armor += 10, c: "#FF0000" },
-        { t: "REGEN", d: "Heal 2HP/s", a: () => playerStats.hpRegen += 2, c: "#FFFF00" },
-        { t: "SPEED", d: "Move faster", a: () => playerStats.speed += 0.2, c: "#808080" }
+      modal.style.display = 'flex';
+
+      let pool = [
+        { name: "Gunner", sub: "Gun Damage +15%", fn: () => weapons.gun.damage += 5 },
+        { name: "Heavy Flow", sub: "Global Strength +20%", fn: () => playerStats.strength += 0.2 },
+        { name: "Water Shield", sub: "Armor +10%", fn: () => playerStats.armor += 10 },
+        { name: "Turbo Drop", sub: "Movement +10%", fn: () => playerStats.walkSpeed += 3 },
+        { name: "Quick Leak", sub: "Atk Speed +15%", fn: () => playerStats.atkSpeed += 0.15 },
+        { name: "Critical Splash", sub: "Crit Chance +5%", fn: () => playerStats.critChance += 0.05 },
+        { name: "Self Hydrate", sub: "Regen +1 HP/sec", fn: () => playerStats.hpRegen += 1 }
       ];
 
-      if(playerStats.lvl === 5) {
-        pool.push({ t: "NEW: SWORD", d: "Frontal Slash", a: () => weapons.sword.active = true, c: "#4ECDC4" });
-      }
+      // Fixed Weapon Unlocks
+      if(playerStats.lvl === 5) pool = [{ name: "Hydra Blade", sub: "Unlock: Sword Slash", fn: () => weapons.sword.active = true }];
+      if(playerStats.lvl === 10) pool = [{ name: "Twin Stream", sub: "Gun: Double Barrels", fn: () => weapons.gun.barrels = 2 }];
+      if(playerStats.lvl === 15) pool = [{ name: "Drown Zone", sub: "Unlock: Energy Aura", fn: () => {
+        weapons.aura.active = true;
+        const auraGeo = new THREE.RingGeometry(3.8, 4, 32);
+        const auraMat = new THREE.MeshBasicMaterial({ color: 0x4ECDC4, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+        weapons.aura.mesh = new THREE.Mesh(auraGeo, auraMat);
+        weapons.aura.mesh.rotation.x = Math.PI/2;
+        scene.add(weapons.aura.mesh);
+      }}];
+      if(playerStats.lvl === 20) pool = [{ name: "Sky Fall", sub: "Unlock: Meteor Strike", fn: () => weapons.meteor.active = true }];
 
-      pool.sort(() => 0.5 - Math.random()).slice(0, 3).forEach(upg => {
+      const finalChoices = pool.sort(() => 0.5 - Math.random()).slice(0, 4);
+      // If lvl 5, 10, 15, 20 we only show that specific upgrade but duplicated to fill 4 cards for dopamine
+      while(finalChoices.length < 4) finalChoices.push(finalChoices[0]);
+
+      finalChoices.forEach(upg => {
         const card = document.createElement('div');
         card.className = 'upgrade-card';
-        card.style.backgroundColor = upg.c;
-        card.innerHTML = `<div class="upgrade-title">${upg.t}</div><div class="upgrade-desc">${upg.d}</div>`;
+        card.innerHTML = `<div class="upgrade-title">${upg.name}</div><div class="upgrade-desc">${upg.sub}</div>`;
         card.onclick = () => {
-          upg.a();
+          upg.fn();
+          modal.style.display = 'none';
           isPaused = false;
-          document.getElementById('levelup-modal').style.display = 'none';
-          updateHUD();
         };
         list.appendChild(card);
       });
-      document.getElementById('levelup-modal').style.display = 'flex';
     }
 
-    function updateHUD() {
-      document.getElementById('hp-fill').style.width = `${(playerStats.hp/playerStats.maxHp)*100}%`;
-      document.getElementById('exp-fill').style.width = `${(playerStats.exp/playerStats.expReq)*100}%`;
-      document.getElementById('hp-text').innerText = `HP: ${Math.floor(playerStats.hp)}/${playerStats.maxHp}`;
-      document.getElementById('lvl-text').innerText = `LVL: ${playerStats.lvl}`;
+    function setupInputs() {
+      const zone = document.getElementById('joystick-zone');
+      zone.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        joystick.active = true;
+        joystick.originX = t.clientX;
+        joystick.originY = t.clientY;
+      });
+      zone.addEventListener('touchmove', (e) => {
+        if(!joystick.active) return;
+        const t = e.touches[0];
+        const dx = t.clientX - joystick.originX;
+        const dy = t.clientY - joystick.originY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const max = 40;
+        joystick.x = (dx/dist) * (Math.min(dist, max)/max);
+        joystick.y = (dy/dist) * (Math.min(dist, max)/max);
+      });
+      zone.addEventListener('touchend', () => { joystick.active = false; joystick.x = 0; joystick.y = 0; });
     }
 
     function animate(time) {
       requestAnimationFrame(animate);
-      if(isPaused || isGameOver) return;
-
+      if(isPaused) return;
+      const dt = 0.016;
+      gameTime += dt;
       frameCount++;
 
-      // Movement
+      // Player Move
       if(joystick.active) {
-        player.position.x += joystick.x * playerStats.speed * 0.1;
-        player.position.z += joystick.y * playerStats.speed * 0.1;
-        player.rotation.y = Math.atan2(joystick.x, joystick.y);
-      }
-
-      // Camera follow
-      camera.position.x = player.position.x + 20;
-      camera.position.z = player.position.z + 20;
-      camera.lookAt(player.position);
-
-      // Spawning
-      if(frameCount % 120 === 0) spawnEnemy();
-
-      // Enemy logic
-      enemies.forEach((en, i) => {
-        const dir = new THREE.Vector3().subVectors(player.position, en.mesh.position).normalize();
-        en.mesh.position.addScaledVector(dir, en.speed);
+        const spd = (playerStats.walkSpeed/25) * 0.12;
+        playerObj.position.x += joystick.x * spd;
+        playerObj.position.z += joystick.y * spd;
+        playerObj.rotation.y = Math.atan2(joystick.x, joystick.y);
         
-        if(en.mesh.position.distanceTo(player.position) < 1) {
-          playerStats.hp -= (33 * (1 - playerStats.armor/100));
-          en.hp = 0; // Suicide attack
-          if(playerStats.hp <= 0) {
-            isGameOver = true;
-            document.getElementById('gameover-screen').style.display = 'flex';
-          }
-          updateHUD();
-        }
-      });
-
-      // Weapon: Gun
-      if(time - weapons.gun.lastShot > weapons.gun.cooldown && enemies.length > 0) {
-        const target = enemies[0].mesh.position;
-        const bullet = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshBasicMaterial({color: 0xff0}));
-        bullet.position.copy(player.position);
-        const bDir = new THREE.Vector3().subVectors(target, player.position).normalize();
-        projectiles.push({ mesh: bullet, dir: bDir, life: 100 });
-        scene.add(bullet);
-        weapons.gun.lastShot = time;
+        // Walk Particles
+        if(frameCount % 5 === 0) spawnParticles(playerObj.position, 0xadd8e6, 1);
+        
+        // Squish Effect
+        playerObj.scale.set(1.1, 0.9, 1.1);
+      } else {
+        playerObj.scale.lerp(new THREE.Vector3(1,1,1), 0.1);
       }
 
-      // Projectile updates
-      projectiles.forEach((p, pi) => {
-        p.mesh.position.addScaledVector(p.dir, 0.4);
+      camera.position.x = playerObj.position.x + 20;
+      camera.position.z = playerObj.position.z + 20;
+      camera.lookAt(playerObj.position);
+
+      // Weapons Logic
+      if(time - weapons.gun.lastShot > weapons.gun.cooldown / playerStats.atkSpeed) {
+        let nearest = null, minDist = 15;
+        enemies.forEach(e => {
+          const d = playerObj.position.distanceTo(e.mesh.position);
+          if(d < minDist) { minDist = d; nearest = e; }
+        });
+        if(nearest) {
+          for(let i=0; i<weapons.gun.barrels; i++) {
+            const bGeo = new THREE.SphereGeometry(0.2);
+            const bMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+            const b = new THREE.Mesh(bGeo, bMat);
+            b.position.copy(playerObj.position);
+            const dir = new THREE.Vector3().subVectors(nearest.mesh.position, playerObj.position).normalize();
+            projectiles.push({ mesh: b, vel: dir.multiplyScalar(0.4), life: 100, dmg: weapons.gun.damage * playerStats.strength });
+            scene.add(b);
+          }
+          weapons.gun.lastShot = time;
+        }
+      }
+
+      // Aura Logic & Visual
+      if(weapons.aura.active) {
+        weapons.aura.mesh.position.copy(playerObj.position);
+        weapons.aura.mesh.position.y = 0.1;
+        weapons.aura.mesh.rotation.z += 0.05;
+        if(time - weapons.aura.lastShot > weapons.aura.cooldown) {
+          enemies.forEach(e => {
+            if(playerObj.position.distanceTo(e.mesh.position) < weapons.aura.range) {
+              e.hp -= weapons.aura.damage * playerStats.strength;
+              spawnParticles(e.mesh.position, 0x4ECDC4, 1);
+            }
+          });
+          weapons.aura.lastShot = time;
+        }
+      }
+
+      // Enemy Spawn
+      if(frameCount % 100 === 0) {
+        const ang = Math.random() * Math.PI*2;
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.7,0.7), new THREE.MeshToonMaterial({color: COLORS.enemySquare}));
+        mesh.position.set(playerObj.position.x + Math.cos(ang)*20, 0.5, playerObj.position.z + Math.sin(ang)*20);
+        scene.add(mesh);
+        enemies.push({ mesh, hp: 50 + playerStats.lvl*10 });
+      }
+
+      // Updates
+      projectiles.forEach((p, i) => {
+        p.mesh.position.add(p.vel);
         p.life--;
-        enemies.forEach(en => {
-          if(p.mesh.position.distanceTo(en.mesh.position) < 0.8) {
-            en.hp -= weapons.gun.damage * playerStats.strength;
+        enemies.forEach(e => {
+          if(p.mesh.position.distanceTo(e.mesh.position) < 0.8) {
+            e.hp -= p.dmg;
             p.life = 0;
+            spawnParticles(e.mesh.position, 0xff0000, 3, true);
           }
         });
-        if(p.life <= 0) {
-          scene.remove(p.mesh);
-          projectiles.splice(pi, 1);
-        }
+        if(p.life <= 0) { scene.remove(p.mesh); projectiles.splice(i, 1); }
       });
 
-      // Cleanup dead enemies
-      enemies = enemies.filter(en => {
-        if(en.hp <= 0) {
-          scene.remove(en.mesh);
-          playerStats.exp += 10;
-          playerStats.kills++;
-          if(playerStats.exp >= playerStats.expReq) levelUp();
+      enemies.forEach((e, i) => {
+        const dir = new THREE.Vector3().subVectors(playerObj.position, e.mesh.position).normalize();
+        e.mesh.position.addScaledVector(dir, 0.05);
+        if(e.mesh.position.distanceTo(playerObj.position) < 0.8) {
+          playerStats.hp -= (20 * (1 - playerStats.armor/100));
+          spawnParticles(playerObj.position, 0x0000ff, 15, true); // BIG WATER SPLASH
+          e.hp = 0;
           updateHUD();
-          return false;
+          if(playerStats.hp <= 0) {
+            isPaused = true;
+            document.getElementById('gameover-screen').style.display = 'flex';
+            document.getElementById('final-score').innerText = "Kills: " + playerStats.kills;
+          }
         }
-        return true;
+        if(e.hp <= 0) {
+          playerStats.kills++;
+          playerStats.exp += 10;
+          if(playerStats.exp >= playerStats.expReq) { playerStats.exp = 0; playerStats.lvl++; showLevelUp(); }
+          scene.remove(e.mesh);
+          enemies.splice(i, 1);
+          updateHUD();
+        }
       });
 
-      // Environment animation
-      scene.children.forEach(c => {
-        if(c.userData.isWindmill) c.userData.blades.rotation.z += 0.05;
+      particles.forEach((p, i) => {
+        p.mesh.position.add(p.vel);
+        p.vel.y -= 0.01;
+        p.life--;
+        if(p.mesh.position.y < 0.05) { p.mesh.position.y = 0.05; p.vel.set(0,0,0); }
+        if(p.life <= 0) { scene.remove(p.mesh); particles.splice(i, 1); }
       });
 
       renderer.render(scene, camera);
+    }
+
+    function updateHUD() {
+      document.getElementById('hp-fill').style.width = (playerStats.hp/playerStats.maxHp)*100 + "%";
+      document.getElementById('exp-fill').style.width = (playerStats.exp/playerStats.expReq)*100 + "%";
+      document.getElementById('hp-text').innerText = "HP: " + Math.ceil(playerStats.hp);
+      document.getElementById('lvl-text').innerText = "LVL: " + playerStats.lvl;
     }
 
     init();
