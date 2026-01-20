@@ -1437,4 +1437,25 @@
 
       enemies.forEach(e => e.update(dt, player.mesh.position));
       projectiles = projectiles.filter(p => p.update() !== false);
-      meteors = mete
+      meteors = meteors = meteors.filter(m => m.update() !== false);
+      expGems.forEach(g => g.update(player.mesh.position));
+      particles = particles.filter(p => p.update() !== false);
+      
+      scene.children.forEach(c => {
+        if (c.userData.isWindmill) {
+          c.children[1].rotation.z += 0.05;
+          c.children[2].rotation.z += 0.05;
+        }
+      });
+
+      enemies = enemies.filter(e => !e.isDead);
+      expGems = expGems.filter(g => g.active);
+
+      renderer.render(scene, camera);
+    }
+
+    try { init(); } catch(e) { console.error(e); alert("Game Error: " + e.message); }
+
+  </script>
+</body>
+</html>
