@@ -1431,3 +1431,53 @@
           const d = player.mesh.position.distanceTo(e.mesh.position);
           if (d < weapons.aura.range) {
             e.takeDamage(weapons.aura.damage * playerStats
+            
+                        e.takeDamage(weapons.aura.damage * playerStats.strength);
+            hit = true;
+          }
+        });
+        if (hit) {
+          playSound('hit');
+        }
+        weapons.aura.lastShot = time;
+      }
+
+      if (weapons.meteor.active && time - weapons.meteor.lastShot > weapons.meteor.cooldown) {
+        let targetX = player.mesh.position.x + (Math.random() - 0.5) * 10;
+        let targetZ = player.mesh.position.z + (Math.random() - 0.5) * 10;
+        
+        if (enemies.length > 0) {
+          const e = enemies[Math.floor(Math.random() * enemies.length)];
+          targetX = e.mesh.position.x;
+          targetZ = e.mesh.position.z;
+        }
+        
+        meteors.push(new Meteor(targetX, targetZ));
+        weapons.meteor.lastShot = time;
+      }
+
+      enemies.forEach(e => e.update(dt, player.mesh.position));
+      projectiles = projectiles.filter(p => p.update() !== false);
+      meteors = meteors.filter(m => m.update() !== false);
+      expGems.forEach(g => g.update(player.mesh.position));
+      particles = particles.filter(p => p.update() !== false);
+      
+      scene.children.forEach(c => {
+        if (c.userData.isWindmill) {
+          c.children[1].rotation.z += 0.05;
+          c.children[2].rotation.z += 0.05;
+        }
+      });
+
+      enemies = enemies.filter(e => !e.isDead);
+      expGems = expGems.filter(g => g.active);
+
+      renderer.render(scene, camera);
+    }
+
+    try { init(); } catch(e) { console.error(e); alert("Game Error: " + e.message); }
+
+  </script>
+</body>
+</html>
+            
