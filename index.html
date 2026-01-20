@@ -1,44 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Game</title>
-    <style>
-        body { background: black; color: white; font-family: Arial, sans-serif; }
-        #gameArea { width: 100vw; height: 100vh; position: relative; }
-    </style>
+    <title>My Web Page</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <h1 style="text-align:center;">Welcome to the Arcade Game!</h1>
-    <div id="gameArea"></div>
-    <script>
-        // 3D Game Mechanics and Logic
-        const gameArea = document.getElementById('gameArea');
-
-        function initGame() {
-            // Setup 3D Environment
-            // Initialize variables for gameplay: player position, score, etc.
-        }
-
-        function drawFlyingText(message) {
-            const text = document.createElement('div');
-            text.innerText = message;
-            text.style.position = 'absolute';
-            text.style.animation = 'fly 3s forwards';
-            gameArea.appendChild(text);
-
-            // Remove the text after animation
-            setTimeout(() => text.remove(), 3000);
-        }
-
-        function levelUp() {
-            drawFlyingText('Level Up!');
-            // Implement level-up mechanics (increase score, difficulty, etc.)
-        }
-
-        // Add event listeners and game loops
-        initGame();
-    </script>
+    <h1>Welcome to My Web Page</h1>
+    <p>This is a sample text for the main content area.</p>
+    <script src="script.js"></script>
 </body>
 </html>
